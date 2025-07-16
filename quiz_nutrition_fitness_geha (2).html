@@ -1,191 +1,233 @@
-
 <!DOCTYPE html>
-<html lang="he">
+<html lang="he" dir="rtl">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>🍎 חידון תזונה ופעילות גופנית – צוות גהה 🏃‍♀️</title>
+  <meta charset="UTF-8" />
+  <title>חידון ספורט גהה</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
     body {
-      font-family: "Segoe UI", sans-serif;
+      font-family: 'Arial', sans-serif;
+      background-color: #f0f8ff;
+      margin: 0;
+      padding: 0;
       direction: rtl;
-      padding: 20px;
-      background: linear-gradient(to bottom right, #fffde7, #e8f5e9);
-      color: #333;
     }
-    .quiz-container {
-      background: white;
-      padding: 30px;
-      border-radius: 20px;
-      max-width: 700px;
+    .container {
+      max-width: 800px;
       margin: auto;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+      padding: 30px 20px;
     }
-    h2 {
-      text-align: center;
-      color: #388e3c;
-      margin-bottom: 20px;
-    }
-    .question {
-      margin-bottom: 20px;
-      font-size: 20px;
-      font-weight: bold;
-    }
-    .answers button {
-      display: block;
-      margin: 8px 0;
-      width: 100%;
-      padding: 12px;
-      font-size: 16px;
-      background-color: #ffffff;
-      border: 2px solid #66bb6a;
-      border-radius: 10px;
-      cursor: pointer;
-      transition: all 0.3s ease;
-    }
-    .answers button:hover {
-      background-color: #c8e6c9;
-    }
-    #nextBtn {
-      margin-top: 20px;
+    .screen {
       display: none;
-      padding: 12px 24px;
-      background-color: #388e3c;
+    }
+    .active {
+      display: block;
+    }
+    h1, h2 {
+      color: #0077b6;
+      text-align: center;
+    }
+    .question-box {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    .options label {
+      display: block;
+      padding: 10px;
+      margin: 8px 0;
+      background-color: #e0f7fa;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .options input {
+      margin-left: 10px;
+    }
+    button {
+      display: block;
+      margin: 20px auto 0;
+      padding: 10px 20px;
+      background-color: #0077b6;
       color: white;
       border: none;
-      border-radius: 8px;
+      border-radius: 10px;
       font-size: 16px;
       cursor: pointer;
     }
-    #explanation {
-      margin-top: 10px;
-      padding: 10px;
-      background-color: #f1f8e9;
-      border-left: 6px solid #8bc34a;
-      border-radius: 8px;
-      font-size: 16px;
-    }
-    #result {
-      font-size: 22px;
+    .explanation {
+      margin-top: 15px;
       font-weight: bold;
-      margin-top: 30px;
-      text-align: center;
-      color: #2e7d32;
+    }
+    .nav-buttons {
+      display: flex;
+      justify-content: space-between;
     }
   </style>
 </head>
 <body>
-  <div class="quiz-container">
-    <h2>🍎 חידון תזונה ופעילות גופנית – צוות גהה 🏃‍♀️</h2>
-    <div id="quiz"></div>
-    <div id="explanation"></div>
-    <button id="nextBtn" onclick="nextQuestion()">שאלה הבאה ➡️</button>
-    <div id="result"></div>
+  <div class="container">
+    <div id="home" class="screen active">
+      <h1>🏃‍♀️ חידון ספורט גהה 🏋️‍♂️</h1>
+      <p style="text-align:center;">מוכנים לאתגר? ענו על שאלה אחת בכל פעם ולמדו בדרך!</p>
+      <button onclick="startQuiz()">התחל חידון</button>
+    </div>
+    <div id="quiz" class="screen">
+      <h2 id="question-title"></h2>
+      <div class="question-box">
+        <div class="options" id="options"></div>
+        <div id="explanation" class="explanation"></div>
+        <div class="nav-buttons">
+          <button onclick="goHome()">🏠 מסך הבית</button>
+          <button id="nextBtn" onclick="nextQuestion()" disabled>הבא ➡️</button>
+        </div>
+      </div>
+    </div>
+    <div id="result" class="screen">
+      <h1>✨ סיימתם את החידון!</h1>
+      <p id="final-score" style="text-align:center; font-size: 18px;"></p>
+      <button onclick="goHome()">🔁 חזרה למסך הבית</button>
+    </div>
   </div>
 
   <script>
-    const questions = [
+    const quizData = [
       {
-        question: "🍗 כמה גרם חלבון מומלץ לאדם פעיל לצרוך ביום, לפי ההמלצות הכלליות?",
-        answers: ["0.8 גרם לכל ק"ג", "1.2–2 גרם לכל ק"ג", "2.5–3 גרם לכל ק"ג", "4 גרם לכל ק"ג"],
-        correct: 1,
-        explanation: "לאדם פעיל מומלץ לצרוך כ-1.2–2 גרם חלבון לכל ק"ג משקל גוף ביום, תלוי בסוג האימון."
+        question: "מהו השריר הגדול ביותר בגוף האדם מבחינת נפח ומסה?",
+        options: ["הסולאוס (שריר השוק העמוק)", "הדלתואיד (כתף)", "הגלוטאוס מקסימוס (ישבן)", "הלטיסימוס דורסי (גב רחב)"],
+        correct: 2,
+        explanation: "הגלוטאוס מקסימוס הוא השריר הגדול ביותר בגוף."
       },
       {
-        question: "⚡ מה ההבדל העיקרי בין פעילות אירובית לאנאירובית?",
-        answers: ["אירובית איטית ואנאירובית מהירה", "אירובית צורכת חמצן, אנאירובית לא", "אירובית פועלת על לב ואנאירובית לא", "אין הבדל אמיתי"],
+        question: "כמה זמן מומלץ לבצע פעילות אירובית מתונה בשבוע לפי ארגון הבריאות העולמי?",
+        options: ["30 דקות ביום, 3 פעמים בשבוע", "150 דקות בשבוע", "שעתיים ביום", "60 דקות בשבוע"],
         correct: 1,
-        explanation: "פעילות אירובית משתמשת בחמצן ליצירת אנרגיה, אנאירובית מתבצעת ללא נוכחות חמצן, כמו ספרינטים."
+        explanation: "ההמלצה היא לפחות 150 דקות של פעילות אירובית מתונה בכל שבוע."
       },
       {
-        question: "💦 איזה מינרל חשוב במיוחד לאיזון בזמן אימון עם הזעה מרובה?",
-        answers: ["ברזל", "אשלגן", "סידן", "מגנזיום"],
-        correct: 1,
-        explanation: "אשלגן חיוני לאיזון נוזלים, תפקוד עצבי ושרירי – והוא נאבד בזיעה."
+        question: "מה נחשב לדופק מנוחה תקין אצל מבוגר בריא?",
+        options: ["20-30 פעימות לדקה", "40-50 פעימות לדקה", "60-100 פעימות לדקה", "מעל 120 פעימות לדקה"],
+        correct: 2,
+        explanation: "דופק מנוחה תקין למבוגר נע בין 60 ל-100 פעימות לדקה."
       },
       {
-        question: "🚶‍♀️ כמה צעדים ביום מומלץ ללכת לשמירה על בריאות כללית?",
-        answers: ["3,000", "5,000", "7,000", "10,000"],
+        question: "מהי מטרת החימום לפני אימון גופני?",
+        options: ["להעלות מסת שריר", "לשפר קואורדינציה", "למנוע פציעות ולהכין את הגוף למאמץ", "להוריד דופק"],
+        correct: 2,
+        explanation: "חימום מעלה את טמפרטורת השרירים ומפחית את הסיכון לפציעות."
+      },
+      {
+        question: "באיזה ענף ספורט יש הכי הרבה שופטים על המגרש בעת ובעונה אחת?",
+        options: ["כדורגל", "כדורסל", "טניס", "פוטבול אמריקאי"],
         correct: 3,
-        explanation: "10,000 צעדים ביום היא מטרה מומלצת לפעילות יומית לשמירה על כושר ובריאות לב."
+        explanation: "בפוטבול אמריקאי יש לעיתים מעל 7 שופטים על המגרש בו זמנית."
       },
       {
-        question: "🍌 מה כדאי לאכול אחרי אימון כוח?",
-        answers: ["ירקות בלבד", "חלבון + פחמימות", "שומנים", "רק מים"],
+        question: "איזו תכונה גופנית בעיקר משתפרת באימון פליאומטרי?",
+        options: ["סיבולת", "גמישות", "כוח מתפרץ", "שיווי משקל"],
+        correct: 2,
+        explanation: "אימון פליאומטרי משפר את הכוח המתפרץ בזכות קפיצות ודחיפות מהירות."
+      },
+      {
+        question: "מהי סיבולת לב-ריאה?",
+        options: ["היכולת של השריר להתכווץ במהירות", "היכולת לבצע פעילות גופנית לאורך זמן מבלי להתעייף", "מדד לשומן גוף", "עמידות למחלות"],
         correct: 1,
-        explanation: "שילוב של חלבון ופחמימות אחרי אימון מסייע לבניית שריר ולמילוי מאגרי גליקוגן."
+        explanation: "סיבולת לב-ריאה משקפת את היכולת של הגוף לשמור על מאמץ לאורך זמן."
       },
       {
-        question: "🥵 מה מהבאים יכול להעיד על תשישות חום בזמן אימון?",
-        answers: ["כאב ראש, סחרחורת, בחילה", "עייפות שרירים בלבד", "חולשה אחרי לילה לבן", "צמא מתון"],
+        question: "מי נחשבת לישראלית הראשונה שזכתה במדליה אולימפית?",
+        options: ["יעל ארד", "אנסטסיה גורבן", "לינוי אשרם", "נטע ריבקין"],
         correct: 0,
-        explanation: "תשישות חום עלולה להתבטא בכאבי ראש, סחרחורת, בחילה, הזעה מוגברת ובלבול – מצב שמצריך מנוחה ומים."
+        explanation: "יעל ארד זכתה במדליית כסף בג'ודו באולימפיאדת ברצלונה 1992."
       },
       {
-        question: "🍞 למה חשוב לשלב פחמימות בארוחה אחרי אימון?",
-        answers: ["כדי להרגיע את הרעב", "כדי לעזור בהחזרת נוזלים", "כדי לשחזר גליקוגן בשריר", "כי זה טעים"],
+        question: "מהו אימון פונקציונלי?",
+        options: ["אימון שמבוצע רק על מכשירים", "אימון שכולל רק תרגילי כוח", "אימון שמדמה תנועות מחיי היום-יום כדי לשפר תפקוד", "אימון שמתאים רק לספורטאים"],
         correct: 2,
-        explanation: "פחמימות ממלאות מחדש את מאגרי הגליקוגן שנפגעים באימון, חיוני להתאוששות."
+        explanation: "אימון פונקציונלי מחזק תנועות בסיסיות שנעשות ביומיום כמו הרמה, סיבוב ודחיפה."
       },
       {
-        question: "❌ איך משפיעה תזונה דלה בפחמימות על ביצועים ספורטיביים?",
-        answers: ["משפרת סיבולת", "לא משפיעה כלל", "עלולה לפגוע באנרגיה וסיבולת", "משפרת כוח"],
+        question: "כמה צעדים ביום מומלץ ללכת כדי לשמור על אורח חיים פעיל?",
+        options: ["1,000", "5,000", "10,000", "20,000"],
         correct: 2,
-        explanation: "פחמימות הן מקור עיקרי לאנרגיה באימונים – חוסר בהן עלול להוביל לעייפות וירידה בביצועים."
-      },
-      {
-        question: "🔥 באיזה סוג פעילות נשרפת הכי הרבה אנרגיה בדקה?",
-        answers: ["רכיבה", "שחייה", "ריצה מהירה", "הליכה מהירה"],
-        correct: 2,
-        explanation: "ריצה מהירה צורכת הרבה אנרגיה בדקה אחת יותר מרוב סוגי הפעילות, במיוחד במשקל גוף גבוה."
-      },
-      {
-        question: "📊 מה ההבדל בין BMI לאחוז שומן?",
-        answers: ["BMI מדויק יותר", "אחוז שומן תלוי בגובה", "BMI מעריך משקל ביחס לגובה, אחוז שומן מודד הרכב גוף", "אין הבדל"],
-        correct: 2,
-        explanation: "BMI נותן הערכה כללית לפי גובה ומשקל, אך לא מבחין בין שריר לשומן. אחוז שומן מודד את הרכב הגוף בפועל."
+        explanation: "ההמלצה הרווחת היא 10,000 צעדים ביום, אך גם 7,000 נחשבים בריאים."
       }
     ];
 
-    let current = 0;
+    let currentQuestion = 0;
     let score = 0;
 
-    function loadQuestion() {
-      const quiz = document.getElementById("quiz");
-      const q = questions[current];
-      document.getElementById("explanation").innerHTML = "";
-      quiz.innerHTML = `<div class="question"><strong>שאלה ${current + 1}:</strong> ${q.question}</div>`;
-      const answersHTML = q.answers.map((ans, i) => `<button onclick="checkAnswer(${i})">${ans}</button>`).join("");
-      quiz.innerHTML += `<div class="answers">${answersHTML}</div>`;
-      document.getElementById("nextBtn").style.display = "none";
+    function startQuiz() {
+      score = 0;
+      currentQuestion = 0;
+      document.getElementById("home").classList.remove("active");
+      document.getElementById("result").classList.remove("active");
+      document.getElementById("quiz").classList.add("active");
+      showQuestion();
     }
 
-    function checkAnswer(selected) {
-      const q = questions[current];
-      const buttons = document.querySelectorAll(".answers button");
-      buttons.forEach((btn, i) => {
-        btn.disabled = true;
-        if (i === q.correct) btn.style.background = "#a5d6a7";
-        if (i === selected && i !== q.correct) btn.style.background = "#ef9a9a";
+    function showQuestion() {
+      const q = quizData[currentQuestion];
+      document.getElementById("question-title").textContent = `${currentQuestion + 1}. ${q.question}`;
+      const optionsDiv = document.getElementById("options");
+      const explanationDiv = document.getElementById("explanation");
+      const nextBtn = document.getElementById("nextBtn");
+      optionsDiv.innerHTML = "";
+      explanationDiv.textContent = "";
+      explanationDiv.style.display = "none";
+      nextBtn.disabled = true;
+
+      q.options.forEach((opt, i) => {
+        const label = document.createElement("label");
+        const input = document.createElement("input");
+        input.type = "radio";
+        input.name = "option";
+        input.value = i;
+        input.onclick = () => handleAnswer(i);
+        label.appendChild(input);
+        label.appendChild(document.createTextNode(opt));
+        optionsDiv.appendChild(label);
       });
-      if (selected === q.correct) score++;
-      document.getElementById("explanation").innerHTML = `💡 ${q.explanation}`;
-      document.getElementById("nextBtn").style.display = "block";
+    }
+
+    function handleAnswer(selectedIndex) {
+      const q = quizData[currentQuestion];
+      const explanationDiv = document.getElementById("explanation");
+      const isCorrect = selectedIndex === q.correct;
+
+      if (isCorrect) {
+        score++;
+        explanationDiv.style.color = "green";
+        explanationDiv.textContent = "נכון! " + q.explanation;
+      } else {
+        explanationDiv.style.color = "red";
+        explanationDiv.textContent = "שגוי. " + q.explanation;
+      }
+
+      explanationDiv.style.display = "block";
+      document.getElementById("nextBtn").disabled = false;
+      document.querySelectorAll('input[name="option"]').forEach(input => input.disabled = true);
     }
 
     function nextQuestion() {
-      current++;
-      if (current < questions.length) {
-        loadQuestion();
+      currentQuestion++;
+      if (currentQuestion < quizData.length) {
+        showQuestion();
       } else {
-        document.getElementById("quiz").innerHTML = "";
-        document.getElementById("explanation").innerHTML = "";
-        document.getElementById("nextBtn").style.display = "none";
-        document.getElementById("result").innerHTML = `🏁 סיימת את החידון!<br>✔️ ענית נכון על ${score} מתוך ${questions.length} שאלות.<br>מעולה לצוות מקצועי כמוך!`;
+        showResult();
       }
     }
 
-    loadQuestion();
+    function showResult() {
+      document.getElementById("quiz").classList.remove("active");
+      document.getElementById("result").classList.add("active");
+      document.getElementById("final-score").textContent = `ענית נכון על ${score} מתוך ${quizData.length} שאלות ✅`;
+    }
+
+    function goHome() {
+      document.querySelectorAll(".screen").forEach(el => el.classList.remove("active"));
+      document.getElementById("home").classList.add("active");
+    }
   </script>
 </body>
 </html>
